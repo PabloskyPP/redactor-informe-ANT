@@ -96,6 +96,27 @@ El programa ejecutará automáticamente los siguientes pasos:
 7. Convertir automáticamente a PDF
 8. Guardar el informe PDF en `informes_generados/`
 
+📊 FORMATO DEL EXCEL del que se leen los datos
+====================
+
+Tu archivo Excel DEBE tener dos hojas:
+
+HOJA 1: "info"
+--------------
+| sub_num || age || tasks |
+|---------||-----||-------|
+| Fulanito|| 25  ||  ANT  |
+
+
+HOJA 2: "ANT", valores ejemplo
+| trial || block || congruency || cue || location || FixationTime || ITI || direction || response || correct || RT |
+|-------||-------||------------||-----||----------||--------------||-----||-----------||----------||---------||----|
+|   1   ||   1   || congruent  ||center||   top   ||     958      || 842 ||   right   ||    NA    ||    0    ||1700|
+
+
+|---------||-----||-------|
+| Fulanito|| 25  ||  ANT  |
+
 ### Archivos Generados
 
 Después de ejecutar el programa, encontrará los siguientes archivos en la carpeta `informes_generados/`:
@@ -105,19 +126,19 @@ Después de ejecutar el programa, encontrará los siguientes archivos en la carp
 ## 📈 Puntuaciones Calculadas
 
 ### Índices de Precisión:
-- **A (Aciertos)**: Porcentaje de respuestas correctas
+- **A (Aciertos)**: Porcentaje de respuestas correctas, número de respuestas correctas/número de ensayos
 - **C (Comisiones)**: Número de errores por respuesta incorrecta
 - **O (Omisiones)**: Número de errores por falta de respuesta
-- **F_A (Fatiga en precisión)**: Diferencia en precisión entre inicio y final de la prueba
+- **F_A (Fatiga en precisión)**: Diferencia en precisión entre inicio y final de la prueba, se calcula restando el porcentage de respuestas correctas de los primeros 1/3 de ensayos con el porcentage del último 1/3 de ensayos.
 
 ### Índices de Velocidad:
-- **TR (Tiempo de Reacción)**: Tiempo promedio de respuesta en milisegundos
-- **F_TR (Fatiga en velocidad)**: Diferencia en velocidad entre inicio y final de la prueba
+- **TR (Tiempo de Reacción)**: promedio del tiempo  de respuesta en milisegundos
+- **F_TR (Fatiga en velocidad)**: Diferencia en velocidad de respuesta entre los primeros 1/3 de ensayos con el porcentage del último 1/3 de ensayos.
 
 ### Índices de Redes Atencionales:
-- **TR_alerta**: Eficiencia de la red de alerta (diferencia entre condiciones con/sin señal de aviso)
-- **TR_orientacion**: Eficiencia de la red de orientación (diferencia entre condiciones con pista espacial)
-- **TR_ejecutivo**: Eficiencia de la red ejecutiva (diferencia entre condiciones congruentes/incongruentes)
+- **TR_alerta**: Eficiencia de la red de alerta (TR promedio de todos los eventos con cue double - cue nocue)
+- **TR_orientacion**: Eficiencia de la red de orientación (TR promedio de todos los eventos con cue spatial - cue center)
+- **TR_ejecutivo**: Eficiencia de la red ejecutiva (TR promedio de todos los eventos con congruency incongruent - congruency congruent)
 
 
 ### Baremos y Clasificación:
