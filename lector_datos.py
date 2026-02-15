@@ -65,8 +65,8 @@ def calcular_puntuaciones_directas(datos):
     Calcula las puntuaciones directas del test ANT
     
     Estructura esperada del Excel (hoja 'ANT):
-    - Primera fila: variables (trial, block, congruency, cue, location, fixationTime, ITI, direction, response, correct, RT)
-    - Siguientes filas: datos de cada ensayo
+    - Primera columna: nombre del índice (A, C, O, F_A, TR, TR_alerta, TR_orientacion, TR_ejecutivo, F_TR)
+    - Segunda columna: valor del índice
     
     Args:
         datos: Dict con 'edad' y 'datos_ANT'
@@ -76,13 +76,13 @@ def calcular_puntuaciones_directas(datos):
     """
     df = datos['datos_ANT']
     
-    # La estructura es: primera fila = índices, segunda fila = valores
-    # Obtenemos los nombres de las columnas (pueden variar)
-    columnas = df.columns.tolist()
+    # La estructura es: primera columna = índices, segunda columna = valores
+    if len(df.columns) < 2:
+        raise ValueError("El Excel debe tener al menos 2 columnas (índice y valor)")
     
-    if len(df) < 2:
-        raise ValueError("El Excel debe tener al menos 2 filas (índices y valores)")
-    
+    # Definir las columnas para índice y valor
+    col_indice = 0
+    col_valor = 1
     
     # Diccionario para almacenar las puntuaciones por serie
     resultados = {
@@ -129,12 +129,14 @@ def calcular_puntuaciones_directas(datos):
             resultados['PD_F_TR'] = valor
         elif indice == 'TR':
             resultados['PD_TR'] = valor
-        elif indice == 'TR_alerta':
+        elif indice == 'TR_ALERTA':
             resultados['PD_TR_alerta'] = valor
-        elif indice == 'TR_orientacion':
+        elif indice == 'TR_ORIENTACION':
             resultados['PD_TR_orientacion'] = valor
-        elif indice == 'TR_ejecutivo':
+        elif indice == 'TR_EJECUTIVO':
             resultados['PD_TR_ejecutivo'] = valor
+    
+    return resultados
 
 
 # ============================================================================

@@ -10,7 +10,7 @@ from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from PIL import Image
 from textos import (
-    PARRAFOS_FIJOS, PARRAFO_A, PARRAFO_C, PARRAFO_O, PARRAFO_S, PARRAFO_TR, PARRAFO_ejecutivo, PARRAFO_alerta, PARRAFO_orientacion,
+    PARRAFOS_FIJOS, PARRAFO_A, PARRAFO_C, PARRAFO_O, PARRAFO_F, PARRAFO_TR, PARRAFO_ejecutivo, PARRAFO_alerta, PARRAFO_orientacion,
 )
 
 def agregar_portada(doc: Document, nombre_completo: str, datos: dict) -> None:
@@ -179,7 +179,7 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
     doc.add_paragraph(PARRAFOS_FIJOS['texto_tabla_resultados'].format(nombre=nombre, nombre_completo=nombre_completo))
 
     # Tabla PDs, PTs y clasificaciones
-    tabla = doc.add_table(rows=4, cols=6)
+    tabla = doc.add_table(rows=4, cols=10)
 
     # Aplicar estilo simple con bordes negros y encabezado con fondo gris claro
     tabla.style = 'Table Grid'
@@ -194,13 +194,13 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
     hdr_cells[2].text = 'Comisiones (C)'
     hdr_cells[3].text = 'Omisiones (O)'
     hdr_cells[4].text = 'Fatiga precisión (F_A)'
-    hdr_cells[5].text = 'Velocidad de respuesta (TR)'
-    hdr_cells[6].text = 'Fatiga velocidad de respuesta (F_TR)'
-    hdr_cells[7].text = 'Eficaciencia de la red de alerta (TR_alerta)'
-    hdr_cells[8].text = 'Eficaciencia de la red de orientación (TR_orientacion)'
-    hdr_cells[9].text = 'Eficaciencia de la red ejecutiva (TR_ejecutivo)'
+    hdr_cells[5].text = 'Fatiga velocidad (F_TR)'
+    hdr_cells[6].text = 'Velocidad (TR)'
+    hdr_cells[7].text = 'Red alerta'
+    hdr_cells[8].text = 'Red orientación'
+    hdr_cells[9].text = 'Red ejecutiva'
 
-
+    
     # Centrar el texto en las celdas del encabezado
     for cell in hdr_cells:
         for paragraph in cell.paragraphs:
@@ -213,21 +213,21 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
     row1[2].text = str(resultados.get('PD_C', 0))
     row1[3].text = str(resultados.get('PD_O', 0))
     row1[4].text = str(resultados.get('PD_F_A', 0))
-    row1[5].text = str(resultados.get('PD_TR', 0))
-    row1[6].text = str(resultados.get('PD_F_TR', 0))
+    row1[5].text = str(resultados.get('PD_F_TR', 0))
+    row1[6].text = str(resultados.get('PD_TR', 0))
     row1[7].text = str(resultados.get('PD_TR_alerta', 0))
     row1[8].text = str(resultados.get('PD_TR_orientacion', 0))
     row1[9].text = str(resultados.get('PD_TR_ejecutivo', 0))
     
-    # Fila 2: PT (Puntuación Típica) - E no tiene PT
+    # Fila 2: PT (Puntuación Típica)
     row2 = tabla.rows[2].cells
     row2[0].text = 'Puntuación Típica (PT)'
     row2[1].text = str(resultados.get('PT_A', 0))
     row2[2].text = str(resultados.get('PT_C', 0))
     row2[3].text = str(resultados.get('PT_O', 0))
     row2[4].text = str(resultados.get('PT_F_A', 0))
-    row2[5].text = str(resultados.get('PT_TR', 0))
-    row2[6].text = str(resultados.get('PT_F_TR', 0))
+    row2[5].text = str(resultados.get('PT_F_TR', 0))
+    row2[6].text = str(resultados.get('PT_TR', 0))
     row2[7].text = str(resultados.get('PT_TR_alerta', 0))
     row2[8].text = str(resultados.get('PT_TR_orientacion', 0))
     row2[9].text = str(resultados.get('PT_TR_ejecutivo', 0))
@@ -261,50 +261,61 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
     clas_A = resultados.get('Clasificacion_A', 'normal')
     clas_C = resultados.get('Clasificacion_C', 'normal')
     clas_O = resultados.get('Clasificacion_O', 'normal')
-    clas_F_A = resultados.get('Clasificacion_A', 'normal')
+    clas_F_A = resultados.get('Clasificacion_F_A', 'normal')
     clas_F_TR = resultados.get('Clasificacion_F_TR', 'normal')
     clas_TR = resultados.get('Clasificacion_TR', 'normal')
     clas_TR_alerta = resultados.get('Clasificacion_TR_alerta', 'normal')
     clas_TR_orientacion = resultados.get('Clasificacion_TR_orientacion', 'normal')
     clas_TR_ejecutivo = resultados.get('Clasificacion_TR_ejecutivo', 'normal')
     
-    # Función auxiliar para buscar la clave correcta en el diccionario
-    def encontrar_clave_PT(a, c, o, f_a, f_tr, tr, tr_alerta, tr_orientacion, tr_ejecutivo):
-        """Genera posibles claves y busca en PARRAFOS_PT"""
-  
-            posibles_claves = [
-                    f'P {a} C {c} O {o} F_A {f_a} F_TR {f_tr} TR {tr} TR_alerta {tr_alerta} TR_orientacion {tr_orientacion} TR_ejecutivo {tr_ejecutivo}',
-                    f'P {a} C {c} O {o}',  # Clave simplificada
-                    f'P {a}',  # Solo A
-                    f'C {c}',  # Solo C
-                    f'O {o}',  # Solo O
-                    f'F_A {f_a}',  # Solo F_A
-                    f'F_TR {f_tr}',  # Solo F_TR
-                    f'TR {tr}',  # Solo TR
-                    f'TR_alerta {tr_alerta}',  # Solo TR_alerta
-                    f'TR_orientacion {tr_orientacion}',  # Solo TR_orientacion
-                    f'TR_ejecutivo {tr_ejecutivo}'  # Solo TR_ejecutivo
-                ]
-                for clave in posibles_claves:
-                    if clave in PARRAFOS_PT:
-                        return clave
-                return None
-
-    # Buscar y añadir párrafo correspondiente
+    # Construir el texto interpretativo usando los diccionarios importados
     texto_condicional = ""
-    clave_PT = encontrar_clave_PT(clas_A, clas_C, clas_O, clas_F_A, clas_F_TR, clas_TR, clas_TR_alerta, clas_TR_orientacion, clas_TR_ejecutivo)
     
-    if clave_PT and clave_PT in PARRAFOS_PT:
-        texto_pt = PARRAFOS_PT[clave_PT].format(nombre=nombre)
-        texto_condicional += texto_pt
-    else:
-        # Si no se encuentra la clave, agregar mensaje de debug
-        print(f"Advertencia: No se encontró texto para A={clas_A}, C={clas_C}, O={clas_O}")
-        texto_condicional += f"Resultados: A={clas_A}, C={clas_C}, O={clas_O}. "
-
+    # Añadir párrafo para A (Aciertos)
+    clave_A = f'A {clas_A}'
+    if clave_A in PARRAFO_A:
+        texto_condicional += PARRAFO_A[clave_A].format(nombre=nombre) + " "
+    
+    # Añadir párrafo para C (Comisiones)
+    clave_C = f'C {clas_C}'
+    if clave_C in PARRAFO_C:
+        texto_condicional += PARRAFO_C[clave_C].format(nombre=nombre) + " "
+    
+    # Añadir párrafo para O (Omisiones)
+    clave_O = f'O {clas_O}'
+    if clave_O in PARRAFO_O:
+        texto_condicional += PARRAFO_O[clave_O].format(nombre=nombre) + " "
+    
+    # Añadir párrafo para F (Fatiga) - combinar F_A y F_TR
+    clave_F = f'F_A {clas_F_A} y F_TR {clas_F_TR}'
+    if clave_F in PARRAFO_F:
+        texto_condicional += PARRAFO_F[clave_F].format(nombre=nombre) + " "
+    
+    # Añadir párrafo para TR (Tiempo de Reacción)
+    clave_TR = f'TR {clas_TR}'
+    if clave_TR in PARRAFO_TR:
+        texto_condicional += PARRAFO_TR[clave_TR].format(nombre=nombre) + " "
+    
+    # Añadir párrafo para TR_alerta (Red de Alerta)
+    clave_alerta = f'TR_alerta {clas_TR_alerta}'
+    if clave_alerta in PARRAFO_alerta:
+        texto_condicional += PARRAFO_alerta[clave_alerta].format(nombre=nombre) + " "
+    
+    # Añadir párrafo para TR_orientacion (Red de Orientación)
+    clave_orientacion = f'TR_orientacion {clas_TR_orientacion}'
+    if clave_orientacion in PARRAFO_orientacion:
+        texto_condicional += PARRAFO_orientacion[clave_orientacion].format(nombre=nombre) + " "
+    
+    # Añadir párrafo para TR_ejecutivo (Red Ejecutiva)
+    clave_ejecutivo = f'TR_ejecutivo {clas_TR_ejecutivo}'
+    if clave_ejecutivo in PARRAFO_ejecutivo:
+        texto_condicional += PARRAFO_ejecutivo[clave_ejecutivo].format(nombre=nombre) + " "
 
     # Añadir todo el texto condicional al documento en un solo párrafo
-    doc.add_paragraph(texto_condicional)
+    if texto_condicional:
+        doc.add_paragraph(texto_condicional)
+    else:
+        doc.add_paragraph(f"Resultados del análisis de {nombre}: A={clas_A}, C={clas_C}, O={clas_O}, F_A={clas_F_A}, F_TR={clas_F_TR}, TR={clas_TR}.")
 
     # ========================================================================
     return doc
