@@ -40,6 +40,9 @@ Thumbs.db
 *.xlsx
 *.docx
 
+# Allow the example file
+!Ejemplo.xlsx
+
 # Generated reports folder
 informes_generados/
 
