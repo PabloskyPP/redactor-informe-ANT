@@ -45,7 +45,7 @@ def leer_datos_excel(ruta_archivo):
             nombre = None
         
         # Leer hoja 'ANT' con los datos del test
-        # header=None porque no hay fila de encabezados, los datos empiezan en la primera fila
+        # La primera fila contiene los encabezados
         df_ant = pd.read_excel(ruta_archivo, sheet_name='ANT', header=None)
         
         return {
@@ -64,8 +64,8 @@ def calcular_puntuaciones_directas(datos):
     """
     Calcula las puntuaciones directas del test ANT
     
-    Estructura esperada del Excel (hoja 'ANT):
-    - Primera fila: variables (trial, block, congruency, cue, location, fixationTime, ITI, direction, response, correct, RT)
+    Estructura esperada del Excel (hoja 'ANT'):
+    - Primera fila: encabezados (trial, block, congruency, cue, location, FixationTime, ITI, direction, response, correct, RT)
     - Siguientes filas: datos de cada ensayo
     
     Args:
@@ -76,65 +76,106 @@ def calcular_puntuaciones_directas(datos):
     """
     df = datos['datos_ANT']
     
-    # La estructura es: primera fila = índices, segunda fila = valores
-    # Obtenemos los nombres de las columnas (pueden variar)
-    columnas = df.columns.tolist()
+    # Leer la hoja ANT con encabezados
+    # Asumimos que la primera fila contiene los encabezados
+    df.columns = df.iloc[0]
+    df = df[1:]  # Eliminar la fila de encabezados
+    df = df.reset_index(drop=True)
     
-    if len(df) < 2:
-        raise ValueError("El Excel debe tener al menos 2 filas (índices y valores)")
+    # Convertir columnas numéricas
+    df['correct'] = pd.to_numeric(df['correct'], errors='coerce')
+    df['RT'] = pd.to_numeric(df['RT'], errors='coerce')
     
+    # Calcular número total de ensayos
+    total_trials = len(df)
     
-    # Diccionario para almacenar las puntuaciones por serie
+    # Calcular terciles para fatiga
+    tercile_size = total_trials // 3
+    first_third = df.iloc[:tercile_size]
+    last_third = df.iloc[-tercile_size:]
+    
+    # Diccionario para almacenar las puntuaciones
     resultados = {
         'edad': datos['edad'],
         'sub_num': datos.get('sub_num'),
         'nombre_completo': datos.get('nombre_completo'),
         'nombre': datos.get('nombre'),
         'datos_ANT': df,
-        
-        # Promedio de puntuaciones por serie y Variables de puntuaciones extraídas del excel
-        'PD_A': 0,
-        'PD_C': 0,
-        'PD_O': 0,
-        'PD_F_A': 0,
-        'PD_TR': 0, 
-        'PD_TR_doubleAst': 0,# TR ante eventos de doble asterisco
-        'PD_TR_noAst': 0, # TR ante eventos de ningún asterisco
-        'PD_TR_alerta': 0, # TR_doubleAst - TR_noAst
-        'PD_TR_ladoAst': 0, # TR ante eventos con un asterisco a un lado
-        'PD_TR_centroAst': 0,# TR ante eventos con un asterisco en el centro
-        'PD_TR_orientacion': 0,# TR_ladoAst - TR_centroAst
-        'PD_TR_congruente': 0, # TR ante eventos congruentes
-        'PD_TR_incongruente': 0, # TR ante eventos incongruentes
-        'PD_TR_ejecutivo': 0,# TR_incongruente - TR_congruente
-        'PD_F_TR': 0,  # Fatiga o variabilidad del tiempo de reacción principio y final de la prueba
-
     }
     
-    # Leer los valores del DataFrame según el índice
-    for idx, row in df.iterrows():
-        indice = str(row[col_indice]).strip().upper()
-        valor = row[col_valor]
-        
-        # Asignar el valor según el índice
-        if indice == 'A':
-            resultados['PD_A'] = valor
-        elif indice == 'C':
-            resultados['PD_C'] = valor
-        elif indice == 'O':
-            resultados['PD_O'] = valor
-        elif indice == 'F_A':
-            resultados['PD_F_A'] = valor
-        elif indice == 'F_TR':
-            resultados['PD_F_TR'] = valor
-        elif indice == 'TR':
-            resultados['PD_TR'] = valor
-        elif indice == 'TR_alerta':
-            resultados['PD_TR_alerta'] = valor
-        elif indice == 'TR_orientacion':
-            resultados['PD_TR_orientacion'] = valor
-        elif indice == 'TR_ejecutivo':
-            resultados['PD_TR_ejecutivo'] = valor
+    # === ÍNDICES DE PRECISIÓN ===
+    
+    # A (Aciertos): Porcentaje de respuestas correctas
+    correct_responses = df['correct'].sum()
+    resultados['PD_A'] = (correct_responses / total_trials) * 100
+    
+    # C (Comisiones): Número de errores por respuesta incorrecta
+    # correct=0 pero response != NA (respondió pero mal)
+    commissions = ((df['correct'] == 0) & (df['response'].notna())).sum()
+    resultados['PD_C'] = commissions
+    
+    # O (Omisiones): Número de errores por falta de respuesta
+    # response == NA (no respondió)
+    omissions = df['response'].isna().sum()
+    resultados['PD_O'] = omissions
+    
+    # F_A (Fatiga en precisión): Diferencia en precisión entre inicio y final
+    # Porcentaje de aciertos del primer 1/3 - porcentaje de aciertos del último 1/3
+    accuracy_first = (first_third['correct'].sum() / len(first_third)) * 100
+    accuracy_last = (last_third['correct'].sum() / len(last_third)) * 100
+    resultados['PD_F_A'] = accuracy_first - accuracy_last
+    
+    # === ÍNDICES DE VELOCIDAD ===
+    
+    # TR (Tiempo de Reacción): promedio del tiempo de respuesta en milisegundos
+    # Solo considerar respuestas válidas (donde RT no es NaN)
+    valid_rt = df['RT'].dropna()
+    resultados['PD_TR'] = valid_rt.mean()
+    
+    # F_TR (Fatiga en velocidad): Diferencia en TR entre primer 1/3 y último 1/3
+    tr_first = first_third['RT'].dropna().mean()
+    tr_last = last_third['RT'].dropna().mean()
+    resultados['PD_F_TR'] = tr_last - tr_first
+    
+    # === ÍNDICES DE REDES ATENCIONALES ===
+    
+    # TR_alerta: Eficiencia de la red de alerta
+    # TR promedio de eventos con cue "double" - TR promedio de eventos con cue "nocue"
+    df_double = df[df['cue'] == 'double']
+    df_nocue = df[df['cue'] == 'nocue']
+    
+    tr_double = df_double['RT'].dropna().mean()
+    tr_nocue = df_nocue['RT'].dropna().mean()
+    
+    resultados['PD_TR_doubleAst'] = tr_double
+    resultados['PD_TR_noAst'] = tr_nocue
+    resultados['PD_TR_alerta'] = tr_double - tr_nocue
+    
+    # TR_orientacion: Eficiencia de la red de orientación
+    # TR promedio de eventos con cue "spatial" - TR promedio de eventos con cue "center"
+    df_spatial = df[df['cue'] == 'spatial']
+    df_center = df[df['cue'] == 'center']
+    
+    tr_spatial = df_spatial['RT'].dropna().mean()
+    tr_center = df_center['RT'].dropna().mean()
+    
+    resultados['PD_TR_ladoAst'] = tr_spatial
+    resultados['PD_TR_centroAst'] = tr_center
+    resultados['PD_TR_orientacion'] = tr_spatial - tr_center
+    
+    # TR_ejecutivo: Eficiencia de la red ejecutiva
+    # TR promedio de eventos con congruency "incongruent" - TR promedio de eventos con congruency "congruent"
+    df_incongruent = df[df['congruency'] == 'incongruent']
+    df_congruent = df[df['congruency'] == 'congruent']
+    
+    tr_incongruent = df_incongruent['RT'].dropna().mean()
+    tr_congruent = df_congruent['RT'].dropna().mean()
+    
+    resultados['PD_TR_congruente'] = tr_congruent
+    resultados['PD_TR_incongruente'] = tr_incongruent
+    resultados['PD_TR_ejecutivo'] = tr_incongruent - tr_congruent
+    
+    return resultados
 
 
 # ============================================================================

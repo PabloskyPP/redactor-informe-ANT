@@ -35,7 +35,7 @@ BAREMOS_BASE = {
     58: {"A": 135, "C": 179,"O": 179,"F_A": 179,"F_TR": 179, "TR": 90, "TR_alerta": 59, "TR_orientacion": 9.9, "TR_ejecutivo": 9.9},
     56: {"A": 131, "C": 179,"O": 179,"F_A": 179,"F_TR": 179, "TR": 87, "TR_alerta": 57, "TR_orientacion": 8.1, "TR_ejecutivo": 8.1},
     54: {"A": 127, "C": 179,"O": 179,"F_A": 179,"F_TR": 179, "TR": 85, "TR_alerta": 54, "TR_orientacion": 6.3, "TR_ejecutivo": 6.3},
-    52: {"A": 123, "C": 179,"O": 179,"F_A": 179,"F_TR": 179, "TR": 82, "TR_alerta": 52, "TR_orientacion":4.5 ," TR_ejecutivo" :4.5 },
+    52: {"A": 123, "C": 179,"O": 179,"F_A": 179,"F_TR": 179, "TR": 82, "TR_alerta": 52, "TR_orientacion":4.5, "TR_ejecutivo":4.5},
     50: {"A": 119, "C": 179,"O": 179,"F_A": 179,"F_TR": 179, "TR": 79, "TR_alerta": 50, "TR_orientacion": 2.7, "TR_ejecutivo": 2.7},
     48: {"A": 115, "C": 179,"O": 179,"F_A": 179,"F_TR": 179, "TR": 76, "TR_alerta": 48, "TR_orientacion": 0.9, "TR_ejecutivo": 0.9},
     46: {"A": 111, "C": 179,"O": 179,"F_A": 179,"F_TR": 179, "TR": 73, "TR_alerta": 46, "TR_orientacion": -0.9, "TR_ejecutivo": -0.9},
@@ -83,18 +83,34 @@ def obtener_PT_desde_PD(PD_ajustada, indice):
     
     Args:
         PD_ajustada: Puntuación directa ajustada por edad
-        indice: 'A', 'TR', 'TR_alerta', 'TR_orientacion' o 'TR_ejecutivo'
+        indice: 'A', 'C', 'O', 'F_A', 'F_TR', 'TR', 'TR_alerta', 'TR_orientacion' o 'TR_ejecutivo'
         
     Returns:
         int: Puntuación típica (20-80)
     """
-    # Buscar en los baremos de mayor a menor PT
-    for pt in sorted(BAREMOS_BASE.keys(), reverse=True):
-        if PD_ajustada >= BAREMOS_BASE[pt][indice]:
-            return pt
+    # Verificar si el baremo para este índice tiene valores reales (no placeholder 179)
+    # Si todos los valores son 179, significa que no hay baremo disponible
+    if all(BAREMOS_BASE[pt][indice] == 179 for pt in BAREMOS_BASE.keys()):
+        # No hay baremo disponible, devolver PT=50 (normal) por defecto
+        return 50
     
-    # Si es menor que el mínimo, devolver PT=20
-    return 20
+    # Para índices de error como C y O, menor es mejor (baremo inverso)
+    if indice in ['C', 'O']:
+        # Buscar en los baremos de menor a mayor PT (invertido)
+        for pt in sorted(BAREMOS_BASE.keys()):
+            if PD_ajustada <= BAREMOS_BASE[pt][indice]:
+                return pt
+        # Si es mayor que el máximo, devolver PT=20
+        return 20
+    else:
+        # Para índices normales (A, TR, TR_alerta, etc.), mayor PD = mayor PT
+        # Buscar en los baremos de mayor a menor PT
+        for pt in sorted(BAREMOS_BASE.keys(), reverse=True):
+            if PD_ajustada >= BAREMOS_BASE[pt][indice]:
+                return pt
+        
+        # Si es menor que el mínimo, devolver PT=20
+        return 20
 
 
 def clasificar_PT(PT):
@@ -133,7 +149,7 @@ def obtener_puntuaciones_tipicas(resultados):
     # Procesar cada índice (A, C, O, F_A, F_TR, TR, TR_alerta, TR_orientacion, TR_ejecutivo)
     indices = ['A', 'C', 'O', 'F_A', 'F_TR', 'TR', 'TR_alerta', 'TR_orientacion', 'TR_ejecutivo']
     
-        for indice in indices:
+    for indice in indices:
         # Obtener la puntuación directa
         pd_key = f'PD_{indice}'
         pd_value = resultados.get(pd_key, 0)
