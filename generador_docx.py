@@ -313,7 +313,6 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
         texto_condicional += PARRAFO_ejecutivo[clave_ejecutivo].format(nombre=nombre) + " "
 
   # Añadir todo el texto condicional al documento en un solo párrafo
-    doc.add_paragraph(texto_condicional)
     if texto_condicional:
         doc.add_paragraph(texto_condicional)
     else:
