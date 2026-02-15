@@ -52,6 +52,7 @@ proyecto_raven/
 El archivo Excel debe tener la siguiente estructura:
 
 ### Hoja "info"
+Debe contener dos columnas con encabezados en la primera fila:
 - `age`: Edad del evaluado (obligatorio)
 - `sub_num`: Nombre completo del encuestado (opcional pero recomendado)
   - Puede ser un identificador simple o nombre completo con apellidos
@@ -59,11 +60,43 @@ El archivo Excel debe tener la siguiente estructura:
     - `nombre_completo`: valor completo de sub_num
     - `nombre`: solo el primer token (antes del primer espacio)
 
+**Ejemplo:**
+```
+| age | sub_num           |
+|-----|-------------------|
+| 25  | Juan Pérez García |
+```
+
 ### Hoja "ANT"
-Debe contener las siguientes columnas:
-- `Ensayo`: 3 series: P, C, PC
-- `PD`: Indica la puntuación directa en la serie
-- `Errores`: Indica el número de errores durante la serie
+Debe contener dos columnas sin encabezados:
+- **Primera columna**: Nombre del índice (A, C, O, F_A, F_TR, TR, TR_alerta, TR_orientacion, TR_ejecutivo)
+- **Segunda columna**: Valor numérico del índice
+
+**Ejemplo:**
+```
+| A                | 95  |
+| C                | 5   |
+| O                | 3   |
+| F_A              | 2   |
+| F_TR             | 15  |
+| TR               | 450 |
+| TR_alerta        | 35  |
+| TR_orientacion   | 25  |
+| TR_ejecutivo     | 75  |
+```
+
+**Nota**: Los índices representan:
+- **A**: Porcentaje de aciertos
+- **C**: Errores de comisión
+- **O**: Errores de omisión
+- **F_A**: Fatiga en precisión (diferencia inicio-final)
+- **F_TR**: Fatiga en velocidad (diferencia inicio-final)
+- **TR**: Tiempo de reacción promedio (en ms)
+- **TR_alerta**: Eficiencia de la red de alerta
+- **TR_orientacion**: Eficiencia de la red de orientación
+- **TR_ejecutivo**: Eficiencia de la red ejecutiva
+
+Puede usar el archivo `Ejemplo.xlsx` incluido en el repositorio como referencia.
 
 
 ## 🎯 Cómo Usar el Programa
@@ -104,12 +137,28 @@ Después de ejecutar el programa, encontrará los siguientes archivos en la carp
 
 ## 📈 Puntuaciones Calculadas
 
-El programa calcula las siguientes puntuaciones directas:
+El programa procesa los siguientes índices desde el archivo Excel:
 
-### Por cada fila (P, C, PC):
-- **PD de cada serie**: Número de aciertos por serie
-### Totales:
-- **Índice de interferencia**: Diferencia, resto entre la puntuación PC-PC' = PC- CxP /C+P
+### Índices de Precisión:
+- **A (Aciertos)**: Porcentaje de respuestas correctas
+- **C (Comisiones)**: Número de errores por respuesta incorrecta
+- **O (Omisiones)**: Número de errores por falta de respuesta
+- **F_A (Fatiga en precisión)**: Diferencia en precisión entre inicio y final de la prueba
+
+### Índices de Velocidad:
+- **TR (Tiempo de Reacción)**: Tiempo promedio de respuesta en milisegundos
+- **F_TR (Fatiga en velocidad)**: Diferencia en velocidad entre inicio y final de la prueba
+
+### Índices de Redes Atencionales:
+- **TR_alerta**: Eficiencia de la red de alerta (diferencia entre condiciones con/sin señal de aviso)
+- **TR_orientacion**: Eficiencia de la red de orientación (diferencia entre condiciones con pista espacial)
+- **TR_ejecutivo**: Eficiencia de la red ejecutiva (diferencia entre condiciones congruentes/incongruentes)
+
+### Baremos y Clasificación:
+Para cada índice, el programa:
+1. Aplica ajustes según la edad del evaluado
+2. Calcula la Puntuación Típica (PT) de 20 a 80
+3. Clasifica el rendimiento como: **bajo** (PT ≤ 30), **normal** (30 < PT < 70), o **alto** (PT ≥ 70)
 
 ## 🎓 Interpretación de Puntuaciones Típicas
 
