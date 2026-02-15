@@ -113,7 +113,8 @@ def calcular_puntuaciones_directas(datos):
     
     # Leer los valores del DataFrame según el índice
     for idx, row in df.iterrows():
-        indice = str(row[col_indice]).strip().upper()
+        # No convertir a uppercase para mantener consistencia con nombres de variables
+        indice = str(row[col_indice]).strip()
         valor = row[col_valor]
         
         # Asignar el valor según el índice
@@ -129,11 +130,11 @@ def calcular_puntuaciones_directas(datos):
             resultados['PD_F_TR'] = valor
         elif indice == 'TR':
             resultados['PD_TR'] = valor
-        elif indice == 'TR_ALERTA':
+        elif indice == 'TR_alerta':
             resultados['PD_TR_alerta'] = valor
-        elif indice == 'TR_ORIENTACION':
+        elif indice == 'TR_orientacion':
             resultados['PD_TR_orientacion'] = valor
-        elif indice == 'TR_EJECUTIVO':
+        elif indice == 'TR_ejecutivo':
             resultados['PD_TR_ejecutivo'] = valor
     
     return resultados
