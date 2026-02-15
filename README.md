@@ -33,7 +33,7 @@ pip install -r requirements.txt
 ## 📁 Estructura del Proyecto
 
 ```
-proyecto_raven/
+proyecto_ant/
 │
 ├── main.py                      # Programa principal
 ├── images/                      # Guarda las imagenes utilizdas para el informe programa
@@ -104,30 +104,34 @@ Después de ejecutar el programa, encontrará los siguientes archivos en la carp
 
 ## 📈 Puntuaciones Calculadas
 
-El programa calcula las siguientes puntuaciones directas:
+### Índices de Precisión:
+- **A (Aciertos)**: Porcentaje de respuestas correctas
+- **C (Comisiones)**: Número de errores por respuesta incorrecta
+- **O (Omisiones)**: Número de errores por falta de respuesta
+- **F_A (Fatiga en precisión)**: Diferencia en precisión entre inicio y final de la prueba
 
-### Por cada fila (P, C, PC):
-- **PD de cada serie**: Número de aciertos por serie
-### Totales:
-- **Índice de interferencia**: Diferencia, resto entre la puntuación PC-PC' = PC- CxP /C+P
+### Índices de Velocidad:
+- **TR (Tiempo de Reacción)**: Tiempo promedio de respuesta en milisegundos
+- **F_TR (Fatiga en velocidad)**: Diferencia en velocidad entre inicio y final de la prueba
 
-## 🎓 Interpretación de Puntuaciones Típicas
-
-El programa clasifica automáticamente las puntuaciones según baremos por edad:
-
-### PD:
-- **bajo**: Por debajo del PT30
-- **normal**: Entre el PT30 y el PT70
-- **alto**: Por encima del Pc70
+### Índices de Redes Atencionales:
+- **TR_alerta**: Eficiencia de la red de alerta (diferencia entre condiciones con/sin señal de aviso)
+- **TR_orientacion**: Eficiencia de la red de orientación (diferencia entre condiciones con pista espacial)
+- **TR_ejecutivo**: Eficiencia de la red ejecutiva (diferencia entre condiciones congruentes/incongruentes)
 
 
+### Baremos y Clasificación:
+Para cada índice, el programa:
+1. Aplica ajustes según la edad del evaluado
+2. Calcula la Puntuación Típica (PT) de 20 a 80
+3. Clasifica el rendimiento como: **bajo** (PT ≤ 30), **normal** (30 < PT < 70), o **alto** (PT ≥ 70)
 
 ## 📄 Contenido del Informe
 
 El informe generado incluye:
 
 1. **Portada** (Primera página)
-   - Título del test: "Test Stroop"
+   - Título del test: "Test ANT"
    - Nombre completo del encuestado (extraído de `sub_num`)
    - Edad del evaluado
    - Fecha de aplicación (si está disponible)
