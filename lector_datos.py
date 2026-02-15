@@ -77,7 +77,7 @@ def calcular_puntuaciones_directas(datos):
     df = datos['datos_ANT']
     
     # Leer la hoja ANT con encabezados
-    # Asumimos que la primera fila contiene los encabezados
+    # La primera fila contiene los encabezados
     df.columns = df.iloc[0]
     df = df[1:]  # Eliminar la fila de encabezados
     df = df.reset_index(drop=True)
@@ -121,8 +121,8 @@ def calcular_puntuaciones_directas(datos):
     
     # F_A (Fatiga en precisión): Diferencia en precisión entre inicio y final
     # Porcentaje de aciertos del primer 1/3 - porcentaje de aciertos del último 1/3
-    accuracy_first = (first_third['correct'].sum() / len(first_third)) * 100
-    accuracy_last = (last_third['correct'].sum() / len(last_third)) * 100
+    accuracy_first = (first_third['correct'].sum() / len(first_third)) * 100 if len(first_third) > 0 else 0
+    accuracy_last = (last_third['correct'].sum() / len(last_third)) * 100 if len(last_third) > 0 else 0
     resultados['PD_F_A'] = accuracy_first - accuracy_last
     
     # === ÍNDICES DE VELOCIDAD ===
@@ -130,12 +130,14 @@ def calcular_puntuaciones_directas(datos):
     # TR (Tiempo de Reacción): promedio del tiempo de respuesta en milisegundos
     # Solo considerar respuestas válidas (donde RT no es NaN)
     valid_rt = df['RT'].dropna()
-    resultados['PD_TR'] = valid_rt.mean()
+    resultados['PD_TR'] = valid_rt.mean() if len(valid_rt) > 0 else 0
     
     # F_TR (Fatiga en velocidad): Diferencia en TR entre primer 1/3 y último 1/3
-    tr_first = first_third['RT'].dropna().mean()
-    tr_last = last_third['RT'].dropna().mean()
-    resultados['PD_F_TR'] = tr_last - tr_first
+    tr_first = first_third['RT'].dropna()
+    tr_last = last_third['RT'].dropna()
+    tr_first_mean = tr_first.mean() if len(tr_first) > 0 else 0
+    tr_last_mean = tr_last.mean() if len(tr_last) > 0 else 0
+    resultados['PD_F_TR'] = tr_last_mean - tr_first_mean
     
     # === ÍNDICES DE REDES ATENCIONALES ===
     
@@ -144,8 +146,11 @@ def calcular_puntuaciones_directas(datos):
     df_double = df[df['cue'] == 'double']
     df_nocue = df[df['cue'] == 'nocue']
     
-    tr_double = df_double['RT'].dropna().mean()
-    tr_nocue = df_nocue['RT'].dropna().mean()
+    tr_double_vals = df_double['RT'].dropna()
+    tr_nocue_vals = df_nocue['RT'].dropna()
+    
+    tr_double = tr_double_vals.mean() if len(tr_double_vals) > 0 else 0
+    tr_nocue = tr_nocue_vals.mean() if len(tr_nocue_vals) > 0 else 0
     
     resultados['PD_TR_doubleAst'] = tr_double
     resultados['PD_TR_noAst'] = tr_nocue
@@ -156,8 +161,11 @@ def calcular_puntuaciones_directas(datos):
     df_spatial = df[df['cue'] == 'spatial']
     df_center = df[df['cue'] == 'center']
     
-    tr_spatial = df_spatial['RT'].dropna().mean()
-    tr_center = df_center['RT'].dropna().mean()
+    tr_spatial_vals = df_spatial['RT'].dropna()
+    tr_center_vals = df_center['RT'].dropna()
+    
+    tr_spatial = tr_spatial_vals.mean() if len(tr_spatial_vals) > 0 else 0
+    tr_center = tr_center_vals.mean() if len(tr_center_vals) > 0 else 0
     
     resultados['PD_TR_ladoAst'] = tr_spatial
     resultados['PD_TR_centroAst'] = tr_center
@@ -168,8 +176,11 @@ def calcular_puntuaciones_directas(datos):
     df_incongruent = df[df['congruency'] == 'incongruent']
     df_congruent = df[df['congruency'] == 'congruent']
     
-    tr_incongruent = df_incongruent['RT'].dropna().mean()
-    tr_congruent = df_congruent['RT'].dropna().mean()
+    tr_incongruent_vals = df_incongruent['RT'].dropna()
+    tr_congruent_vals = df_congruent['RT'].dropna()
+    
+    tr_incongruent = tr_incongruent_vals.mean() if len(tr_incongruent_vals) > 0 else 0
+    tr_congruent = tr_congruent_vals.mean() if len(tr_congruent_vals) > 0 else 0
     
     resultados['PD_TR_congruente'] = tr_congruent
     resultados['PD_TR_incongruente'] = tr_incongruent
