@@ -23,7 +23,7 @@ def agregar_portada(doc: Document, nombre_completo: str, datos: dict) -> None:
         datos: Diccionario con datos generales (edad, fecha_aplicacion, etc.)
     """
     # Título
-    titulo = doc.add_heading('PRUEBA ANT, Test de Redes Atencionales', 0)
+    titulo = doc.add_heading('Prueba de Redes Atencionales ANT', 0)
     titulo.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     # Aumentar tamaño de fuente del título
     for run in titulo.runs:
@@ -65,7 +65,7 @@ def agregar_portada(doc: Document, nombre_completo: str, datos: dict) -> None:
     nota_run = nota.add_run(f"Este es un informe de evaluación cognitiva, obtenido a partir del rendimiento de {nombre_completo} en la prueba ANT (Test de Redes Atencionales).")
     doc.add_paragraph()  # Espacio
     nota.add_run("\n" + "-" * 50 + "\n")  # Línea de separación
-    nota.add_run("\nInforme confidencial de uso profesional y educativo")
+    nota.add_run("\nEste es un informe confidencial de carácter educativo u orientativo. No es un diagnóstico clínico y su interpretación es conveniente la realice un profesional competente.")
     nota_run.italic = True
     nota_run.font.size = Pt(12)
 
@@ -131,8 +131,8 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
             img = Image.open(grafico_path)
             width, height = img.size
             # Aplicar factor de escala
-            new_width = Inches(width / 96 * scale_factor_width)  # 96 DPI
-            new_height = Inches(height / 96 * scale_factor_height)
+            new_width = Inches(width / 120 * scale_factor_width)  # 96 DPI
+            new_height = Inches(height / 110 * scale_factor_height)
             # Agregar imagen
             doc.add_picture(grafico_path, width=new_width, height=new_height)
             last_paragraph = doc.paragraphs[-1]
@@ -141,28 +141,27 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
             print(f"Advertencia: No se pudo insertar la imagen spatial cue.png: {e}")
     
     doc.add_paragraph(PARRAFOS_FIJOS['descripcion_procedimiento2'])
-    
-    doc.add_paragraph(PARRAFOS_FIJOS['descripcion_procedimiento3'])
-    
+        
     # Imagen parte PC
     grafico_path = os.path.join(script_dir, 'congruency cue.png')
     if os.path.exists(grafico_path):
         try:
             img = Image.open(grafico_path)
             width, height = img.size
-            new_width = Inches(width / 96 * scale_factor_width)
-            new_height = Inches(height / 96 * scale_factor_height)
+            new_width = Inches(width / 120 * scale_factor_width)  # 96 DPI
+            new_height = Inches(height / 110 * scale_factor_height)
             doc.add_picture(grafico_path, width=new_width, height=new_height)
             last_paragraph = doc.paragraphs[-1]
             last_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         except Exception as e:
             print(f"Advertencia: No se pudo insertar la imagen congruency cue.png: {e}")
 
+    doc.add_paragraph(PARRAFOS_FIJOS['descripcion_procedimiento3'])
+
     parrafo = doc.add_paragraph()
     run = parrafo.add_run(PARRAFOS_FIJOS['titulo_indices'])
     run.bold = True
     doc.add_paragraph(PARRAFOS_FIJOS['descripcion_indices'])
-    doc.add_page_break()
 
     # ========================================================================
     # INSERTAR Tabla resultados
@@ -173,7 +172,7 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
     titulo_resultados.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     run = titulo_resultados.add_run(PARRAFOS_FIJOS['titulo_resultados'].format(nombre_completo=nombre_completo))
     run.bold = True
-    run.font.size = Pt(14)
+    run.font.size = Pt(11)
     doc.add_paragraph()  # Espacio
     
     doc.add_paragraph(PARRAFOS_FIJOS['texto_tabla_resultados'].format(nombre=nombre, nombre_completo=nombre_completo))
@@ -190,15 +189,15 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
     # Encabezados
     hdr_cells = tabla.rows[0].cells
     hdr_cells[0].text = ''
-    hdr_cells[1].text = 'Aciertos (A)'
-    hdr_cells[2].text = 'Comisiones (C)'
-    hdr_cells[3].text = 'Omisiones (O)'
-    hdr_cells[4].text = 'Fatiga precisión (F_A)'
-    hdr_cells[5].text = 'Fatiga velocidad (F_TR)'
-    hdr_cells[6].text = 'Velocidad (TR)'
-    hdr_cells[7].text = 'Red alerta'
-    hdr_cells[8].text = 'Red orientación'
-    hdr_cells[9].text = 'Red ejecutiva'
+    hdr_cells[1].text = 'Aciertos'
+    hdr_cells[2].text = 'Comisiones'
+    hdr_cells[3].text = 'Omisiones'
+    hdr_cells[4].text = 'Fatiga precisión'
+    hdr_cells[5].text = 'Fatiga velocidad'
+    hdr_cells[6].text = 'Velocidad'
+    hdr_cells[7].text = 'Alerta'
+    hdr_cells[8].text = 'Orientación'
+    hdr_cells[9].text = 'Control ejecutivo'
 
 
     # Centrar el texto en las celdas del encabezado
@@ -208,20 +207,20 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
             
     # Fila 1: PD (Puntuación Directa)
     row1 = tabla.rows[1].cells
-    row1[0].text = 'Puntuación Directa (PD)'
-    row1[1].text = str(resultados.get('PD_A', 0))
-    row1[2].text = str(resultados.get('PD_C', 0))
-    row1[3].text = str(resultados.get('PD_O', 0))
-    row1[4].text = str(resultados.get('PD_F_A', 0))
-    row1[5].text = str(resultados.get('PD_F_TR', 0))
-    row1[6].text = str(resultados.get('PD_TR', 0))
-    row1[7].text = str(resultados.get('PD_TR_alerta', 0))
-    row1[8].text = str(resultados.get('PD_TR_orientacion', 0))
-    row1[9].text = str(resultados.get('PD_TR_ejecutivo', 0))
+    row1[0].text = 'Punt. Directa'
+    row1[1].text = str(round(resultados.get('PD_A', 0), 4))
+    row1[2].text = str(round(resultados.get('PD_C', 0), 4))
+    row1[3].text = str(round(resultados.get('PD_O', 0), 4))
+    row1[4].text = str(round(resultados.get('PD_F_A', 0), 4))
+    row1[5].text = str(round(resultados.get('PD_F_TR', 0), 4))
+    row1[6].text = str(round(resultados.get('PD_TR', 0), 4))
+    row1[7].text = str(round(resultados.get('PD_TR_alerta', 0), 4))
+    row1[8].text = str(round(resultados.get('PD_TR_orientacion', 0), 4))
+    row1[9].text = str(round(resultados.get('PD_TR_ejecutivo', 0), 4))
     
     # Fila 2: PT (Puntuación Típica)
     row2 = tabla.rows[2].cells
-    row2[0].text = 'Puntuación Típica (PT)'
+    row2[0].text = 'Punt. Típica'
     row2[1].text = str(resultados.get('PT_A', 0))
     row2[2].text = str(resultados.get('PT_C', 0))
     row2[3].text = str(resultados.get('PT_O', 0))
@@ -244,6 +243,26 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
     row3[7].text = str(resultados.get('Clasificacion_TR_alerta', '-'))
     row3[8].text = str(resultados.get('Clasificacion_TR_orientacion', '-'))
     row3[9].text = str(resultados.get('Clasificacion_TR_ejecutivo', '-'))
+    
+    # Colorear celdas según el rendimiento
+    # Verde si es alto, rojo si es bajo (columnas: Aciertos, Alerta, Orientación, Ejecutivo)
+    green_if_high = [1, 4, 5, 9]
+    # Rojo si es alto, verde si es bajo (columnas: Comisiones, Omisiones, Fatiga precisión, Fatiga velocidad, Velocidad)
+    red_if_high = [2, 3, 4, 5, 6, 7, 8]
+    
+    for idx in green_if_high:
+        clasificacion = str(row3[idx].text).lower()
+        if clasificacion == 'alto':
+            row3[idx]._element.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="90EE90"/>'.format(nsdecls('w'))))
+        elif clasificacion == 'bajo':
+            row3[idx]._element.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="FF6B6B"/>'.format(nsdecls('w'))))
+    
+    for idx in red_if_high:
+        clasificacion = str(row3[idx].text).lower()
+        if clasificacion == 'alto':
+            row3[idx]._element.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="FF6B6B"/>'.format(nsdecls('w'))))
+        elif clasificacion == 'bajo':
+            row3[idx]._element.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="90EE90"/>'.format(nsdecls('w'))))
 
     # Centrar el texto en las celdas de las filas 1, 2 y 3
     for row in [row1, row2, row3]:
@@ -291,6 +310,9 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
     clave_F = f'F_A {clas_F_A} y F_TR {clas_F_TR}'
     if clave_F in PARRAFO_F:
         texto_condicional += PARRAFO_F[clave_F].format(nombre=nombre) + " "
+    
+    # Salto de línea entre párrafos
+    texto_condicional += "\n"
     
     # Añadir párrafo para TR (Tiempo de Reacción)
     clave_TR = f'TR {clas_TR}'
