@@ -303,9 +303,11 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
         texto_condicional += PARRAFO_C[clave_C].format(nombre=nombre) + " "
     
     # Añadir párrafo para TR_A_vs_C (Tiempo de respuesta vs precisión)
-    clave_TR_A_vs_C = f'TR_A_vs_C {clas_TR_A_vs_C}'
-    if clave_TR_A_vs_C in PARRAFO_TR_A_vs_C:
-        texto_condicional += PARRAFO_TR_A_vs_C[clave_TR_A_vs_C].format(nombre=nombre) + " "
+    # Solo se añade si C es alto o muy alto (en este sistema 'alto' es la clasificación máxima)
+    if clas_C == 'alto' and clas_TR_A_vs_C is not None:
+        clave_TR_A_vs_C = f'TR_A_vs_C {clas_TR_A_vs_C}'
+        if clave_TR_A_vs_C in PARRAFO_TR_A_vs_C:
+            texto_condicional += PARRAFO_TR_A_vs_C[clave_TR_A_vs_C].format(nombre=nombre) + " "
 
     # Añadir párrafo para O (Omisiones)
     clave_O = f'O {clas_O}'

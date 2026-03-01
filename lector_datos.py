@@ -131,6 +131,17 @@ def calcular_puntuaciones_directas(datos):
     # Solo considerar respuestas válidas (donde RT no es NaN)
     valid_rt = df['RT'].dropna()
     resultados['PD_TR'] = valid_rt.mean() if len(valid_rt) > 0 else 0
+
+    # TR_A (Tiempo de Reacción en aciertos): promedio del TR en respuestas correctas
+    correct_rt = df[df['correct'] == 1]['RT'].dropna()
+    resultados['PD_TR_A'] = correct_rt.mean() if len(correct_rt) > 0 else 0
+
+    # TR_C (Tiempo de Reacción en comisiones): promedio del TR en errores de comisión
+    commission_rt = df[(df['correct'] == 0) & (df['response'].notna())]['RT'].dropna()
+    resultados['PD_TR_C'] = commission_rt.mean() if len(commission_rt) > 0 else 0
+
+    # TR_A_vs_C: diferencia entre TR en aciertos y TR en comisiones
+    resultados['PD_TR_A_vs_C'] = resultados['PD_TR_A'] - resultados['PD_TR_C']
     
     # F_TR (Fatiga en velocidad): Diferencia en TR entre primer 1/3 y último 1/3
     tr_first = first_third['RT'].dropna()
