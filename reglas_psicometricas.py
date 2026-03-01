@@ -168,6 +168,14 @@ def obtener_puntuaciones_tipicas(resultados):
         resultados[f'PT_{indice}'] = pt
         resultados[f'Clasificacion_{indice}'] = clasificacion
 
+    # Clasificar TR_A_vs_C (positivo si TR_A >= TR_C, negativo si TR_A < TR_C)
+    pd_tr_a_vs_c = resultados.get('PD_TR_A_vs_C')
+    if pd_tr_a_vs_c is not None:
+        clasificacion_tr_a_vs_c = 'positivo' if pd_tr_a_vs_c >= 0 else 'negativo'
+    else:
+        clasificacion_tr_a_vs_c = None
+    resultados['Clasificacion_TR_A_vs_C'] = clasificacion_tr_a_vs_c
+
     # Crear diccionario de clasificaciones para retornar
     clasificaciones = {
         'A': resultados['Clasificacion_A'],
@@ -179,6 +187,7 @@ def obtener_puntuaciones_tipicas(resultados):
         'TR_alerta': resultados['Clasificacion_TR_alerta'],
         'TR_orientacion': resultados['Clasificacion_TR_orientacion'],
         'TR_ejecutivo': resultados['Clasificacion_TR_ejecutivo'],
+        'TR_A_vs_C': clasificacion_tr_a_vs_c,
     }
     
     return clasificaciones
