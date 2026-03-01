@@ -10,7 +10,7 @@ from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from PIL import Image
 from textos import (
-    PARRAFOS_FIJOS, PARRAFO_A, PARRAFO_C, PARRAFO_O, PARRAFO_F, PARRAFO_TR, PARRAFO_ejecutivo, PARRAFO_alerta, PARRAFO_orientacion,
+    PARRAFOS_FIJOS, PARRAFO_A, PARRAFO_C, PARRAFO_O, PARRAFO_F, PARRAFO_TR_A_vs_C, PARRAFO_TR, PARRAFO_ejecutivo, PARRAFO_alerta, PARRAFO_orientacion,
 )
 
 def agregar_portada(doc: Document, nombre_completo: str, datos: dict) -> None:
@@ -283,6 +283,7 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
     clas_F_A = resultados.get('Clasificacion_F_A', 'normal')
     clas_F_TR = resultados.get('Clasificacion_F_TR', 'normal')
     clas_TR = resultados.get('Clasificacion_TR', 'normal')
+    clas_TR_A_vs_C = resultados.get('Clasificacion_TR_A_vs_C', 'normal')
     clas_TR_alerta = resultados.get('Clasificacion_TR_alerta', 'normal')
     clas_TR_orientacion = resultados.get('Clasificacion_TR_orientacion', 'normal')
     clas_TR_ejecutivo = resultados.get('Clasificacion_TR_ejecutivo', 'normal')
@@ -301,6 +302,11 @@ def crear_informe_docx(resultados, clasificaciones, nombre_caso="caso", scale_fa
     if clave_C in PARRAFO_C:
         texto_condicional += PARRAFO_C[clave_C].format(nombre=nombre) + " "
     
+    # Añadir párrafo para TR_A_vs_C (Tiempo de respuesta vs precisión)
+    clave_TR_A_vs_C = f'TR_A_vs_C {clas_TR_A_vs_C}'
+    if clave_TR_A_vs_C in PARRAFO_TR_A_vs_C:
+        texto_condicional += PARRAFO_TR_A_vs_C[clave_TR_A_vs_C].format(nombre=nombre) + " "
+
     # Añadir párrafo para O (Omisiones)
     clave_O = f'O {clas_O}'
     if clave_O in PARRAFO_O:
