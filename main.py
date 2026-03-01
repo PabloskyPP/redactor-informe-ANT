@@ -14,8 +14,10 @@ def main():
     Función principal que ejecuta todo el proceso
     """
     # Configuración
-    RUTA_EXCEL = r"C:\Users\Pablo\OneDrive\Escritorio\data\Pablo Prada Camp.xlsx"
-    NOMBRE_CASO = "Pablo"  # Nombre de fallback si no está en el Excel (se usa sub_num si está disponible)
+    RUTA_EXCEL = r"C:\Users\Pablo\OneDrive\Escritorio\data\Livia Frediani-Attention Network Test (ANT).xlsx"
+    # Extraer NOMBRE_CASO del nombre del archivo Excel (primera palabra antes del espacio)
+    nombre_archivo = os.path.basename(RUTA_EXCEL)
+    NOMBRE_CASO = nombre_archivo.split()[0] if nombre_archivo.split() else "Informe"
     
     # Determinar la ruta de la carpeta informes_generados
     script_dir = os.path.dirname(os.path.abspath(__file__))
