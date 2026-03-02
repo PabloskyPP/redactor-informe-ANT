@@ -100,7 +100,7 @@ PARRAFO_TR = {
 
     'TR normal':"""Por otro lado, {nombre} muestra un tiempo de respuesta normal, lo que indica una velocidad de procesamiento de la información y toma de decisiones adecuada a la media para su edad.""",
     
-    'TR alto':"""Por otro lado, {nombre} muestra un tiempo de respuesta elevado, lo que indica una velocidad de procesamiento de la información y toma de decisiones inferior a la media para su edad. Este resultado puede señalar dos fenómenos diferentes: la necesidad de {nombre} de más tiempo para procesar la misma cantidad de información que otros individuos de su edad. O, la prevalencia de un estilo atencional más reflexivo, con respuestas más lentas pero más precisas. Véase el número de errores de comisión para valorar esta segunda posibilidad.""",
+    'TR alto':"""Por otro lado, {nombre} muestra un tiempo de respuesta elevado, lo que indica una velocidad de procesamiento de la información y toma de decisiones inferior a la media para su edad. Este resultado puede señalar dos fenómenos diferentes: la necesidad de {nombre} de más tiempo para procesar la misma cantidad de información que otros individuos de su edad, o la prevalencia de un estilo atencional más reflexivo, con respuestas más lentas pero más precisas. Véase el número de errores de comisión para valorar esta segunda posibilidad.""",
 }
 
 PARRAFO_alerta = {
